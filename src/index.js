@@ -39,11 +39,13 @@ async function onGallaryItemClick(event) {
   let idVideo = await event.target.closest('.video__card');
   const dataSetAtt = await idVideo.dataset.id;
 
-  const KEYS = '345007f9ab440e5b86cef51be6397df1';
-  const videoDaata = await axios(
-    `https:api.themoviedb.org/3/movie/${dataSetAtt}/videos?api_key=${KEYS}`
+  const keys = '345007f9ab440e5b86cef51be6397df1';
+  let videoDaata = await axios(
+    `https:api.themoviedb.org/3/movie/${dataSetAtt}/videos?api_key=${keys}`
   );
   const results = videoDaata.data.results;
+  console.log(results);
+
   const traler = results.find(
     option => option.type === 'Trailer' && option.site === 'YouTube'
   );
