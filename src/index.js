@@ -36,12 +36,12 @@ videoEl.addEventListener('click', onGallaryItemClick);
 async function onGallaryItemClick(event) {
   event.preventDefault();
 
-  let idVideo = await event.target.closest('.video__card');
-  const dataSetAtt = await idVideo.dataset.id;
+  let idVideo = event.target.closest('.video__card');
+  const dataSetAtt = idVideo.dataset.id;
 
   const keys = '345007f9ab440e5b86cef51be6397df1';
   let videoDaata = await axios(
-    `https:api.themoviedb.org/3/movie/${dataSetAtt}/videos?api_key=${keys}`
+    `https://api.themoviedb.org/3/movie/${dataSetAtt}/videos?api_key=${keys}`
   );
   const results = videoDaata.data.results;
   console.log(results);
