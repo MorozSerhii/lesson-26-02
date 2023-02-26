@@ -58,5 +58,3 @@ async function onGallaryItemClick(event) {
     videoBox.show();
   }
 }
-
-console.log(basiclightbox);
