@@ -1,160 +1,65 @@
-import './css/styles.css';
-import PixabayService from './api-pixabay';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-import debounce from 'lodash.debounce';
+import getTrending from './api-pixabay';
+import * as basiclightbox from 'basiclightbox';
+import axios from 'axios';
 
-const inputElement = document.querySelector('input');
-const imageContainer = document.querySelector('.gallery');
-const form = document.querySelector('.search-form');
-const animationContainer = document.querySelector('.wrapper');
+const videoEl = document.querySelector('.video');
 
-const pixabayService = new PixabayService();
-
-const lightBox = new SimpleLightbox('.gallery a');
-
-form.addEventListener('submit', pullMarkup);
-inputElement.addEventListener('input', event => {
-  if (event.target.value === '') {
-    onClear();
-    pixabayService.resetPage();
-    return;
-  }
-});
-let totalHits = '';
-
-async function pullMarkup(e) {
-  e.preventDefault();
-  onClear();
-  const searchQuery = e.currentTarget.elements.searchQuery.value.trim();
-  if (searchQuery === '') {
-    Notify.failure('Hey! enter a search query !');
-
-    return;
-  }
-  animationContainer.classList.remove('is-hidden');
-
-  pixabayService.query = searchQuery;
-  pixabayService.resetPage();
-
-  const response = await pixabayService.getImages();
-
-  if (response.hits.length === 0) {
-    Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again'
-    );
-  }
-  totalHits = await response.totalHits;
-  setTimeout(() => {
-    pushMarkup(response.hits);
-  }, 500);
-  setTimeout(() => {
-    animationContainer.classList.add('is-hidden');
-  }, 500);
-  setTimeout(() => {
-    lightBox.refresh();
-  }, 500);
-
-  notiflix(totalHits);
+async function getVideo() {
+  const response = await getTrending();
+  const data = response.data.results;
+  pushMarkup(data);
 }
 
-function pushMarkup(response) {
-  let allImages = response.reduce(
+function pushMarkup(data) {
+  let cardVideo = data.reduce(
     (markup, response) => createMarkup(response) + markup,
     ''
   );
 
-  imageContainer.insertAdjacentHTML('beforeend', allImages);
+  videoEl.insertAdjacentHTML('beforeend', cardVideo);
 }
 
-function createMarkup({
-  webformatURL,
-  largeImageURL,
-  tags,
-  likes,
-  views,
-  comments,
-  downloads,
-}) {
+function createMarkup({ original_title, poster_path, id }) {
   return `
-  
-  
-  <a class="gallery__item" href="${largeImageURL}">
-  <div class="photo-card">
-  <img class="photo-img" src="${webformatURL}" alt="${tags}" loading="lazy"/>
-  <div class="info">
-    <p class="info-item"> 
-      <b>Likes: ${likes}</b>
-    </p>
-    <p class="info-item"> 
-      <b>Views: ${views}</b>
-    </p>
-    <p class="info-item"> 
-      <b>Comments: ${comments}</b>
-    </p>
-    <p class="info-item">
-      <b>Downloads: ${downloads}</b>
-    </p>
-  </div>
+
+<div class='video__card' data-id = '${id}'>
+<img src="https://image.tmdb.org/t/p/w300/${poster_path}" alt="${original_title}" >
+<h2>${original_title}</h2>
 </div>
-</a>
-  `;
+`;
 }
 
-function notiflix(value) {
-  if (value === 0) {
-    return;
-  }
+getVideo();
 
-  Notify.success(`'Hooray! We found ${value} images'`);
-}
+videoEl.addEventListener('click', onGallaryItemClick);
 
-function onClear() {
-  imageContainer.innerHTML = '';
-}
+async function onGallaryItemClick(event) {
+  event.preventDefault();
 
-function smoothScroll() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
+  let idVideo = event.target.closest('.video__card').dataset.id;
+  console.log(idVideo);
 
-  window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-  });
-}
+  const KEYS = '345007f9ab440e5b86cef51be6397df1';
+  const videoDaata = await axios.get(
+    `https:api.themoviedb.org/3/movie/${idVideo}/videos?api_key=${KEYS}`
+  );
+  const results = videoDaata.data.results;
+  const traler = results.find(
+    option => option.type === 'Trailer' && option.site === 'YouTube'
+  );
 
-async function checkPosition() {
-  const height = document.body.offsetHeight;
-  const screenHeight = window.innerHeight;
-  const scrolled = window.scrollY;
-  const threshold = height - screenHeight / 4;
-  const position = scrolled + screenHeight;
-  if (position >= threshold) {
-    try {
-      if (Math.ceil(totalHits / 40) === pixabayService.page) {
-        setTimeout(() => {
-          Notify.failure(
-            'happy end, no more images to load. Please enter a different search query'
-          );
-        }, 300);
+  console.log(traler);
 
-        window.removeEventListener(
-          'scroll',
-          debounce(checkPosition, DEBOUNCE_DELAY)
-        );
-        return;
-      }
-      pixabayService.incrementPage();
-      const response = await pixabayService.getImages();
-      pushMarkup(response.hits);
-      lightBox.refresh();
-      smoothScroll();
-    } catch {
-      return;
-    }
+  if (traler) {
+    const videoBox = basiclightbox.create(
+      `
+        <iframe src="https://www.youtube.com/embed/${traler.key}"></iframe>
+        
+	`
+    );
+
+    videoBox.show();
   }
 }
-let DEBOUNCE_DELAY = 300;
-window.addEventListener('scroll', debounce(checkPosition, DEBOUNCE_DELAY));
+
+console.log(basiclightbox);
