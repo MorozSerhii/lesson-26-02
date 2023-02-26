@@ -37,7 +37,6 @@ async function onGallaryItemClick(event) {
   event.preventDefault();
 
   let idVideo = event.target.closest('.video__card').dataset.id;
-  console.log(idVideo);
 
   const KEYS = '345007f9ab440e5b86cef51be6397df1';
   const videoDaata = await axios.get(
@@ -47,8 +46,6 @@ async function onGallaryItemClick(event) {
   const traler = results.find(
     option => option.type === 'Trailer' && option.site === 'YouTube'
   );
-
-  console.log(traler);
 
   if (traler) {
     const videoBox = basiclightbox.create(
