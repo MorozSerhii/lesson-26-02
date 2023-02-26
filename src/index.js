@@ -51,13 +51,13 @@ async function onGallaryItemClick(event) {
   );
 
   if (traler) {
-    const videoBox = basiclightbox.create(
+    const videoBoxes = basiclightbox.create(
       `
         <iframe src="https://www.youtube.com/embed/${traler.key}"></iframe>
         
 	`
     );
 
-    videoBox.show();
+    videoBoxes.show();
   }
 }
