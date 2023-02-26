@@ -44,7 +44,6 @@ async function onGallaryItemClick(event) {
     `https://api.themoviedb.org/3/movie/${dataSetAtt}/videos?api_key=${keys}`
   );
   const results = videoDaata.data.results;
-  console.log(results);
 
   const traler = results.find(
     option => option.type === 'Trailer' && option.site === 'YouTube'
