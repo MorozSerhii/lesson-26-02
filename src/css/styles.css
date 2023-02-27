@@ -27,6 +27,7 @@ img{
   
   flex-wrap: wrap;
   gap:  40px;
+  justify-content: center;
 }
 
 
@@ -34,7 +35,7 @@ img{
 .video__card{
 
 
-  width: calc((100% - 120px)/4);
+  width: 370px;
     border:  1px solid #212121;
     border-radius: 10px;
 
